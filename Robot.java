@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -13,12 +16,41 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
+
+  // Motor controllers
+  private final Spark leftMotor1 = new Spark(0);
+  private final Spark leftMotor2 = new Spark(1);
+  private final Spark rightMotor1 = new Spark(2);
+  private final Spark rightMotor2 = new Spark(3);
+
+  // Differential drive system
+  private DifferentialDrive drivetrain;
+
+  // Xbox controller
+  private final XboxController controller = new XboxController(0);
+
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    // Group the left and right motors
+    var leftMotors = new edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup(leftMotor1, leftMotor2);
+    var rightMotors = new edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup(rightMotor1, rightMotor2);
+
+    // Invert the right motors for proper movement
+    rightMotors.setInverted(true);
+
+    // Initialize the drivetrain
+    drivetrain = new DifferentialDrive(leftMotors, rightMotors);
+  }
+
+  @Override
+  public void teleopPeriodic() {
+    // Get joystick input
+    double ySpeed = -controller.getLeftY(); // Forward/backward movement
+    double xSpeed = controller.getRightX(); // Rotation
+
+    // Drive the robot using arcade drive
+    drivetrain.arcadeDrive(ySpeed, xSpeed);
+  }
 
   @Override
   public void robotPeriodic() {}
@@ -31,9 +63,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {}
-
-  @Override
-  public void teleopPeriodic() {}
 
   @Override
   public void disabledInit() {}
